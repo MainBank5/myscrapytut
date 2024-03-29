@@ -10,20 +10,18 @@ class BookspiderSpider(scrapy.Spider):
         books = response.css('article.product_pod')
         
         for book in books:
-            yield {
-                'name':book.css('h3 a::text').get(),
-                'price':book.css('.product_price .price_color::text').get(),
-                'url':response.css('h3 a').attrib['href'],
-            }
+            relative_url =book.css('li.next a::attr(href)').get()  #Extracting URL of the next page
+            
+            if relative_url is not None:   # Checking if there is a next page
+                next_page_url = 'https://books.toscrape.com/' + relative_url # Creating absolute URL for the next page
+                yield response.follow(next_page_url, callback=self.parse_book_page)
         
-        next_page =response.css('li.next a::attr(href)').get()  #Extracting URL of the next page
-        
-        if next_page is not None:   # Checking if there is a next page
-            next_page_url = 'https://books.toscrape.com/' + next_page # Creating absolute URL for the next page
-            yield response.follow(next_page_url, callback=self.parse)
-
-
-
+    
+    def parse_book_page(self, response):
+        pass
+    
+    
+    
 #to select css  selector you can use the following code: 
 '''
 response.css('containerelement.class') to select all products
